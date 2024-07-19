@@ -1,0 +1,21 @@
+---
+# For configuration options and examples, please see:
+# https://gethomepage.dev/latest/configs/bookmarks
+
+- Developer:
+    - Github:
+        - icon: github-light
+          href: https://github.com/Jukelyn/
+
+- Social:
+    - Twitter:
+        - icon: twitter
+          href: https://twitter.com/
+
+- Entertainment:
+    - YouTube:
+        - icon: youtube
+          href: https://youtube.com/@jukelyn
+    - Animension:
+        - icon: /images/animension.png
+          href: https://animension.to/

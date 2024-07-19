@@ -1,0 +1,24 @@
+---
+# For configuration options and examples, please see:
+# https://gethomepage.dev/latest/configs/services
+
+- My First Group:
+    - Portainer:
+        icon: portainer
+        href: https://192.168.1.87:9443
+        container: portainer
+        showStats: true
+    - Traefik:
+        icon: traefik
+        href: http://192.168.1.87:8081
+    - QBittorrent:
+        icon: qbittorrent
+        href: http://192.168.1.87:8080
+    - Prowlarr:
+        icon: prowlarr
+        href: http://192.168.1.87:9696
+
+#- My Second Group:
+#    - My Second Service:
+#        href: http://localhost/
+#        description: Homepage is the best

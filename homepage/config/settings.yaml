@@ -1,0 +1,33 @@
+# For configuration options and examples, please see:
+# https://gethomepage.dev/latest/configs/settings
+title: Jukelyn's Homepage
+
+#cardBlur: xl
+
+background:
+  image: /images/b1.jpeg
+  brightness: 50
+  opacity: 50
+  blur: sm # sm, "", md, xl... see https://tailwindcss.com/docs/backdrop-blur
+
+theme: dark
+color: slate
+
+layout:
+  My First Group:
+    header: false
+    style: row
+    columns: 4
+
+headerStyle: underlined
+
+quicklaunch:
+  hideInternetSearch: true
+  showSearchSuggestions: true
+  hideVisitURL: true
+
+hideVersion: true
+
+providers:
+  openweathermap: openweathermapapikey
+  weatherapi: weatherapiapikey
