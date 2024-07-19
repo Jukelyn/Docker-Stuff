@@ -1,3 +1,6 @@
+# No ovpn files being stored
+*.ovpn
+
 # Dumb macOS
 .DS_Store
 
