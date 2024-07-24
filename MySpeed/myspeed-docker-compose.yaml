@@ -1,0 +1,20 @@
+services:
+  myspeed:
+    container_name: myspeed
+    image: germannewsmaker/myspeed
+    volumes:
+      - ./data:/myspeed/data
+    restart: unless-stopped
+    networks:
+      - start_kuma_net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.myspeed.rule=Host(`speed.jukelyn.com`)"
+      - "traefik.http.routers.myspeed.entrypoints=websecure"
+      - "traefik.http.services.myspeed.loadbalancer.server.port=5216"
+      - "traefik.http.routers.myspeed.service=myspeed"
+      - "traefik.http.routers.myspeed.tls.certresolver=porkbun"
+
+networks:
+  start_kuma_net:
+    external: true
