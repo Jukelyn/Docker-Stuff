@@ -2,9 +2,20 @@ services:
   homepage:
     image: ghcr.io/gethomepage/homepage:latest
     container_name: homepage
-    ports:
-      - 3000:3000
     volumes:
-      - /home/juke/homepage/config:/app/config
+      - ./config:/app/config
       - /var/run/docker.sock:/var/run/docker.sock
-      - /home/juke/homepage/images:/app/public/images
+      - ./images:/app/public/images
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.homepage.rule=Host(`home.jukelyn.com`)"
+      - "traefik.http.routers.homepage.entrypoints=websecure"
+      - "traefik.http.routers.homepage.tls.certresolver=staging"
+      - "traefik.http.services.homepage.loadbalancer.server.port=3000"
+      - "traefik.http.routers.homepage.tls=true"
+    networks:
+      - main_kuma_net
+
+networks:
+  main_kuma_net:
+    external: true

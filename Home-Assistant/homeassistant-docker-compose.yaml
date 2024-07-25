@@ -1,21 +1,22 @@
 services:
-  homepage:
-    image: ghcr.io/gethomepage/homepage:latest
-    container_name: homepage
+  homeassistant:
+    container_name: homeassistant
+    image: homeassistant/home-assistant:latest
     volumes:
-      - /home/juke/homepage/config:/app/config
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /home/juke/homepage/images:/app/public/images
+      - ./config:/config
+      - /etc/localtime:/etc/localtime:ro
+      - /run/dbus:/run/dbus:ro
+    restart: unless-stopped
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.homepage.rule=Host(`home.jukelyn.com`)"
-      - "traefik.http.routers.homepage.entrypoints=websecure"
-      - "traefik.http.routers.homepage.tls.certresolver=staging"
-      - "traefik.http.services.homepage.loadbalancer.server.port=3000"
-      - "traefik.http.routers.homepage.tls=true"
+      - "traefik.http.routers.homeassistant.rule=Host(`homeassistant.jukelyn.com`)"
+      - "traefik.http.routers.homeassistant.entrypoints=websecure"
+      - "traefik.http.routers.homeassistant.tls=true"
+      - "traefik.http.routers.homeassistant.tls.certresolver=porkbun"
+      - "traefik.http.services.homeassistant.loadbalancer.server.port=8123"
     networks:
-      - start_kuma_net
+      - main_kuma_net
 
 networks:
-  start_kuma_net:
+  main_kuma_net:
     external: true
