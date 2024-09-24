@@ -1,0 +1,19 @@
+services:
+  testing_nginx:
+    container_name: testing_nginx
+    image: nginx
+    environment:
+      - TZ=America/New_York
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - ~/sites/mysite/public:/usr/share/nginx/html
+      - ./testing-nginx.conf:/etc/nginx/nginx.conf
+      - ./ssl:/etc/nginx/ssl
+    restart: always
+    networks:
+      - main_kuma_net
+
+networks:
+  main_kuma_net:
+    external: true

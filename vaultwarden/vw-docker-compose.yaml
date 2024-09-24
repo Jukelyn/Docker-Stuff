@@ -1,0 +1,54 @@
+services:
+  vaultwarden:
+    container_name: vw
+    image: vaultwarden/server
+    volumes:
+      - ./vw-data:/data
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    restart: unless-stopped
+    environment:
+      DOMAIN: https://vw.jukelyn.com
+      SIGNUPS_ALLOWED: "false"
+    ports:
+      - ${VW_PORT}:80
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - main_vault
+
+networks:
+  main_vault:
+    external: true
+
+# services:
+#   vaultwarden:
+#     container_name: vw
+#     image: vaultwarden/server:latest
+#     volumes:
+#       - ./vw-data:/data
+#       - /etc/localtime:/etc/localtime:ro
+#       - /etc/timezone:/etc/timezone:ro
+#     restart: unless-stopped
+#     environment:
+#       DOMAIN: https://vaultwarden.jukelyn.com
+#       SIGNUPS_ALLOWED: "false"
+#     labels:
+#       - traefik.enable=true
+#       - traefik.http.routers.vaultwarden.entrypoints=web
+#       - traefik.http.routers.vaultwarden.rule=Host(`vaultwarden.jukelyn.com`)
+#       - traefik.http.middlewares.vaultwarden-https-redirect.redirectscheme.scheme=https
+#       - traefik.http.routers.vaultwarden.middlewares=vaultwarden-https-redirect
+#       - traefik.http.routers.vaultwarden-secure.entrypoints=websecure
+#       - traefik.http.routers.vaultwarden-secure.rule=Host(`vaultwarden.jukelyn.com`)
+#       - traefik.http.routers.vaultwarden-secure.tls=true
+#       - traefik.http.routers.vaultwarden-secure.service=vaultwarden
+#       - traefik.http.services.vaultwarden.loadbalancer.server.port=80
+#     security_opt:
+#       - no-new-privileges:true
+#     networks:
+#       - main_kuma_net
+
+# networks:
+#   main_kuma_net:
+#     external: true

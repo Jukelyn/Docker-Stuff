@@ -1,0 +1,188 @@
+services:
+  kuma:
+    image: louislam/uptime-kuma
+    container_name: kuma
+    volumes:
+      - ./data/kuma_data:/app/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: always
+    environment:
+      - TZ=America/New_York
+    networks:
+      - main_kuma_net
+
+  myspeed:
+    container_name: myspeed
+    image: germannewsmaker/myspeed
+    volumes:
+      - ./data/myspeed_data:/myspeed/data
+    restart: unless-stopped
+    networks:
+      - main_kuma_net
+    healthcheck:
+      test:
+        ["CMD-SHELL", "wget --spider -q http://localhost:5216 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus
+    volumes:
+      - "./configs/prometheus.yml:/etc/prometheus/prometheus.yml"
+      - "./configs/rules.yml:/etc/prometheus/rules.yml"
+    networks:
+      - main_kuma_net
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget --spider -q http://localhost:9090/-/healthy || exit 1",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  node_exporter:
+    image: prom/node-exporter
+    container_name: node_exporter
+    command:
+      - "--path.rootfs=/host"
+    networks:
+      - main_kuma_net
+    pid: host
+    restart: unless-stopped
+    volumes:
+      - "/:/host:ro,rslave"
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor
+    container_name: cadvisor
+    networks:
+      - main_kuma_net
+    volumes:
+      - /:/rootfs:ro
+      - /run:/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    command:
+      - "--housekeeping_interval=30s"
+      - "--docker_only=true"
+    #      - "--disable_metrics=percpu,sched,tcp,udp,disk,diskIO,accelerator,hugetlb,referenced_memory,cpu_topology,resctrl"
+    devices:
+      - /dev/kmsg
+    privileged: true
+    restart: unless-stopped
+
+  # alert-manager:
+  #   container_name: alert_manager
+  #   image: prom/alertmanager
+  #   volumes:
+  #     - "./configs/alertmanager.yml:/alertmanager/alertmanager.yml"
+  #   networks:
+  #     - main_kuma_net
+
+  grafana:
+    image: grafana/grafana-oss
+    container_name: grafana
+    restart: unless-stopped
+    volumes:
+      - ./data/grafana_data:/var/lib/grafana
+    environment:
+      - TZ=America/New_York
+    networks:
+      - main_kuma_net
+
+networks:
+  main_kuma_net:
+    external: true
+
+# services:
+#   uptime-kuma:
+#     image: louislam/uptime-kuma:1
+#     container_name: kuma
+#     volumes:
+#       - ./data/kuma_data:/app/data
+#       - /var/run/docker.sock:/var/run/docker.sock
+#     restart: always
+#     labels:
+#       - "traefik.enable=true"
+#       - "traefik.http.routers.uptime-kuma.rule=Host(`kuma.jukelyn.com`)"
+#       - "traefik.http.routers.uptime-kuma.entrypoints=websecure"
+#       - "traefik.http.routers.uptime-kuma.tls=true"
+#       - "traefik.http.routers.uptime-kuma.tls.certresolver=porkbun"
+#       - "traefik.http.services.uptime-kuma.loadBalancer.server.port=3001"
+#     environment:
+#       - TZ=America/New_York
+#     networks:
+#       - main_kuma_net
+
+#   myspeed:
+#     container_name: myspeed
+#     image: germannewsmaker/myspeed
+#     volumes:
+#       - ./data/myspeed_data:/myspeed/data
+#     restart: unless-stopped
+#     networks:
+#       - main_kuma_net
+#     labels:
+#       - "traefik.enable=true"
+#       - "traefik.http.routers.myspeed.rule=Host(`speed.jukelyn.com`)"
+#       - "traefik.http.routers.myspeed.entrypoints=websecure"
+#       - "traefik.http.services.myspeed.loadbalancer.server.port=5216"
+#       - "traefik.http.routers.myspeed.service=myspeed"
+#       - "traefik.http.routers.myspeed.tls.certresolver=porkbun"
+
+#   prometheus:
+#     container_name: prometheus
+#     image: prom/prometheus
+#     volumes:
+#       - "./configs/prometheus.yml:/etc/prometheus/prometheus.yml"
+#       - "./configs/rules.yml:/etc/prometheus/rules.yml"
+#     networks:
+#       - main_kuma_net
+#     labels:
+#       - "traefik.enable=true"
+#       - "traefik.http.routers.prometheus.rule=Host(`prometheus.jukelyn.com`)"
+#       - "traefik.http.routers.prometheus.entrypoints=websecure"
+#       - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
+#       - "traefik.http.routers.prometheus.service=prometheus"
+#       - "traefik.http.routers.prometheus.tls.certresolver=porkbun"
+
+#   node-exporter:
+#     container_name: node_exporter
+#     image: prom/node-exporter
+#     networks:
+#       - main_kuma_net
+#     labels:
+#       - "traefik.enable=true"
+#       - "traefik.http.routers.node_exporter.rule=Host(`node.jukelyn.com`)"
+#       - "traefik.http.routers.node_exporter.entrypoints=websecure"
+#       - "traefik.http.services.node_exporter.loadbalancer.server.port=9100"
+#       - "traefik.http.routers.node_exporter.service=node_exporter"
+#       - "traefik.http.routers.node_exporter.tls=true"
+#       - "traefik.http.routers.node_exporter.tls.certresolver=porkbun"
+
+#   alert-manager:
+#     container_name: alert_manager
+#     image: prom/alertmanager
+#     volumes:
+#       - "./configs/alertmanager.yml:/alertmanager/alertmanager.yml"
+#     networks:
+#       - main_kuma_net
+#     labels:
+#       - "traefik.enable=true"
+#       - "traefik.http.routers.alert_manager.rule=Host(`alert-manager.jukelyn.com`)"
+#       - "traefik.http.routers.alert_manager.entrypoints=websecure"
+#       - "traefik.http.services.alert_manager.loadbalancer.server.port=9093"
+#       - "traefik.http.routers.alert_manager.service=alert_manager"
+#       - "traefik.http.routers.alert_manager.tls=true"
+#       - "traefik.http.routers.alert_manager.tls.certresolver=porkbun"
+
+# networks:
+#   main_kuma_net:
+#     external: true

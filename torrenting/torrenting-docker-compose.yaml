@@ -1,0 +1,155 @@
+services:
+  gluetun:  # VPN
+    image: qmcgaw/gluetun
+    container_name: gluetun
+    cap_add:
+      - NET_ADMIN
+    ports:
+      - ${QBT_WEBUI_PORT}:8080/tcp  # qbt webui
+      - ${QBT_TRAFFIC_PORT}:8080/udp  # QBT traffic
+      - ${QBT_TRAFFIC_PORT}:6881/tcp  # QBT traffic
+      - ${PROWLARR_WEBUI}:9696  # prowlarr web ui
+      - ${FLARESOLVERR}:8191  # Flaresolverr
+      - ${SONARR_WEBUI}:8989  # sonarr web ui 
+      - ${RADARR_WEBUI}:7878  # radarr web ui 
+      - ${BAZARR_WEBUI}:6767  # bazarr web ui
+      # - 8686:8686  # lidarr web ui
+      # - 8787:8787  # readarr web ui
+      # - 6789:6789  # nzbget webui
+    environment:
+      - VPN_SERVICE_PROVIDER=surfshark
+      - VPN_TYPE=wireguard
+      - WIREGUARD_PRIVATE_KEY=${WG_PRIV}
+      - WIREGUARD_ADDRESSES=${WG_ADDRS}
+      # - VPN_TYPE=openvpn
+      # - OPENVPN_USER=${OVPN_USER}
+      # - OPENVPN_PASSWORD=${OVPN_PASS}
+      - SERVER_COUNTRIES=${COUNTRIES}
+      - SERVER_CITIES=${CITIES}
+      # - SERVER_REGIONS=${REGIONS}
+      - TZ=America/New_York
+    volumes:
+      - ./data/gluetun:/gluetun
+    restart: unless-stopped
+    networks:
+      - main_torrenting
+
+  qbittorrent-nox:
+    image: qbittorrentofficial/qbittorrent-nox
+    container_name: qbittorrent-nox
+    environment:
+      - PGID=1000
+      - PUID=1000
+      - QBT_EULA=${QBT_EULA}
+      - QBT_VERSION=${QBT_VERSION}
+      - QBT_WEBUI_PORT=${QBT_WEBUI_PORT}
+      - TZ=America/New_York
+    volumes:
+      - ./config/qbt:/config
+      - ${TORRENTS_DIR}:/data/torrents
+    restart: unless-stopped
+    network_mode: service:gluetun
+
+  prowlarr:  # indexer manager
+    image: linuxserver/prowlarr
+    container_name: prowlarr
+    environment:
+      - PGID=1000
+      - PUID=1000
+      - TZ=America/New_York
+    volumes:
+      - ./config/prowlarr:/config
+    restart: unless-stopped
+    network_mode: service:gluetun
+
+  sonarr:  # TV
+    image: linuxserver/sonarr
+    container_name: sonarr
+    restart: unless-stopped
+    environment:
+      - PGID=1000
+      - PUID=1000
+      - TZ=America/New_York
+    volumes:
+      - ./config/sonarr:/config
+      - ${MEDIA_DIR}:/data
+    network_mode: service:gluetun
+
+  radarr:  # Movies
+    image: linuxserver/radarr
+    container_name: radarr
+    restart: unless-stopped
+    environment:
+      - PGID=1000
+      - PUID=1000
+      - TZ=America/New_York
+    volumes:
+      - ./config/radarr:/config
+      - ${MEDIA_DIR}:/data
+    network_mode: service:gluetun
+
+  flaresolverr:
+    image: flaresolverr/flaresolverr
+    container_name: flaresolverr
+    environment:
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - LOG_HTML=${LOG_HTML:-false}
+      - CAPTCHA_SOLVER=${CAPTCHA_SOLVER:-none}
+      - TZ=America/New_York
+    restart: unless-stopped
+    network_mode: service:gluetun
+  
+  bazarr:  # Subtitles based on Sonarr and Radarr
+    image: linuxserver/bazarr
+    container_name: bazarr
+    restart: unless-stopped
+    environment:
+      - PGID=1000
+      - PUID=1000
+      - TZ=America/New_York
+    volumes:
+      - ./config/bazarr:/config
+      - ${TV_DIR}:/data/TV
+      - ${MOVIE_DIR}:/data/Movies
+    network_mode: service:gluetun
+
+# ##############################
+
+#   # lidarr:  # Music
+#   #   container_name: lidarr
+#   #   image: linuxserver/lidarr
+#   #   restart: unless-stopped
+#   #   volumes:
+#   #     - ./config/lidarr:/config
+#   #     - ./data/lidarr:/data
+#   #   environment:
+#   #     - TZ=America/New_York
+#   #   network_mode: service:gluetun
+
+#   # readarr:  # ebooks
+#   #   image: lscr.io/linuxserver/readarr:develop
+#   #   container_name: readarr
+#   #   restart: unless-stopped
+#   #   environment:
+#   #     - TZ=America/New_York
+#   #   volumes:
+#   #     - ./config/readarr:/config
+#   #     - ./data/readarr:/data
+#   #   network_mode: service:gluetun
+
+#   # nzbget:  # Usenet downloader
+#   #   image: linuxserver/nzbget
+#   #   container_name: nzbget
+#   #   environment:
+#   #     - NZBGET_USER=${NZB_USER}
+#   #     - NZBGET_PASS=${NZB_PASS}
+#   #     - TZ=America/New_York
+#   #   volumes:
+#   #     - ./config/nzbget:/config
+#   #     - ./data/nzbget:/data
+#   #   restart: unless-stopped
+#   #   network_mode: service:gluetun
+
+networks:
+  main_torrenting:
+    external: true

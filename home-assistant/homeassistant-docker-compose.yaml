@@ -1,22 +1,39 @@
 services:
   homeassistant:
     container_name: homeassistant
-    image: homeassistant/home-assistant:latest
+    image: homeassistant/home-assistant
     volumes:
       - ./config:/config
-      - /etc/localtime:/etc/localtime:ro
       - /run/dbus:/run/dbus:ro
+    environment:
+      - TZ=America/New_York
     restart: unless-stopped
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.homeassistant.rule=Host(`homeassistant.jukelyn.com`)"
-      - "traefik.http.routers.homeassistant.entrypoints=websecure"
-      - "traefik.http.routers.homeassistant.tls=true"
-      - "traefik.http.routers.homeassistant.tls.certresolver=porkbun"
-      - "traefik.http.services.homeassistant.loadbalancer.server.port=8123"
     networks:
-      - main_kuma_net
+      - main_default
 
 networks:
-  main_kuma_net:
+  main_default:
     external: true
+
+# services:
+#   homeassistant:
+#     container_name: homeassistant
+#     image: homeassistant/home-assistant:latest
+#     volumes:
+#       - ./config:/config
+#       - /etc/localtime:/etc/localtime:ro
+#       - /run/dbus:/run/dbus:ro
+#     restart: unless-stopped
+#     labels:
+#       - "traefik.enable=true"
+#       - "traefik.http.routers.homeassistant.rule=Host(`homeassistant.jukelyn.com`)"
+#       - "traefik.http.routers.homeassistant.entrypoints=websecure"
+#       - "traefik.http.routers.homeassistant.tls=true"
+#       - "traefik.http.routers.homeassistant.tls.certresolver=porkbun"
+#       - "traefik.http.services.homeassistant.loadbalancer.server.port=8123"
+#     networks:
+#       - main_kuma_net
+
+# networks:
+#   main_kuma_net:
+#     external: true

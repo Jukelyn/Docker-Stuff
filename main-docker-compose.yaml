@@ -1,0 +1,132 @@
+services:
+  npm:
+    container_name: npm
+    image: jc21/nginx-proxy-manager:latest
+    restart: unless-stopped
+    ports:
+      - 80:80
+      - 443:443
+      - 81:81 # Admin Web Port
+    environment:
+      DISABLE_IPV6: true
+    volumes:
+      - ./data/npm/data:/data
+      - ./data/letsencrypt:/etc/letsencrypt
+    networks:
+      - default
+      - vault
+      - sites
+      - kuma_net
+      - torrenting
+      - immich
+    healthcheck:
+      test: ["CMD", "/usr/bin/check-health"]
+      interval: 10s
+      timeout: 3s
+
+  portainer:
+    container_name: portainer
+    image: portainer/portainer-ce
+    command: -H unix:///var/run/docker.sock
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./data/portainer:/data
+    networks:
+      - default
+
+#  organizr:
+#    image: organizr/organizr
+#    container_name: organizr
+#    restart: unless-stopped
+#    volumes:
+#      - ./data/organizr/config:/config
+#    environment:
+#      - TZ=America/New_York
+#    networks:
+#      - default
+
+networks:
+  vault:
+    driver: bridge
+  default:
+    driver: bridge
+  kuma_net:
+    driver: bridge
+  torrenting:
+    driver: bridge
+  immich:
+    driver: bridge
+  sites:
+    driver: bridge
+
+# services:
+#   portainer:
+#     container_name: portainer
+#     image: portainer/portainer-ce:latest
+#     command: -H unix:///var/run/docker.sock
+#     restart: always
+#     volumes:
+#       - /var/run/docker.sock:/var/run/docker.sock
+#       - ./data/portainer:/data
+#     networks:
+#       - default
+#     labels:
+#       - "traefik.enable=true"
+#       - "traefik.http.routers.portainer.rule=Host(`portainer.jukelyn.com`)"
+#       - "traefik.http.routers.portainer.entrypoints=websecure"
+#       - "traefik.http.services.portainer.loadbalancer.server.port=9000"
+#       - "traefik.http.routers.portainer.service=portainer"
+#       - "traefik.http.routers.portainer.tls.certresolver=porkbun"
+
+#   reverse-proxy:
+#     container_name: traefik
+#     image: traefik:v2.11.6
+#     ports:
+#       - "80:80"
+#       - "443:443"
+#       - "8081:8080"
+#     volumes:
+#       - /var/run/docker.sock:/var/run/docker.sock
+#       - /etc/traefik/traefik.yaml:/etc/traefik/traefik.yaml
+#       - /etc/traefik/certs/acme.json:/acme.json
+#       - /etc/traefik/certs/fullchain.pem:/certs/fullchain.pem
+#       - /etc/traefik/certs/private.key.pem:/certs/private.key.pem
+#     restart: unless-stopped
+#     environment:
+#       - TZ=America/New_York
+#     networks:
+#       - default
+#       - kuma_net
+#     labels:
+#       - "traefik.enable=true"
+#       - "traefik.http.routers.traefik.rule=Host(`traefik.jukelyn.com`)"
+#       - "traefik.http.routers.traefik.entrypoints=websecure"
+#       - "traefik.http.routers.traefik.service=api@internal"
+#       - "traefik.http.routers.traefik.tls.certresolver=production"
+#       - "traefik.http.services.api.loadbalancer.server.port=8080"
+
+#   nginx:
+#     container_name: nginx
+#     image: nginx:latest
+#     labels:
+#       - "traefik.enable=true"
+#       - "traefik.http.routers.nginx.rule=Host(`jukelyn.com`)"
+#       - "traefik.http.routers.nginx.entrypoints=web,websecure"
+#       - "traefik.http.routers.nginx.tls=true"
+#       - "traefik.http.services.nginx.loadbalancer.server.port=80"
+#     volumes:
+#       - ~/site/public:/usr/share/nginx/html
+#       - /etc/nginx/nginx.conf:/etc/nginx/nginx.conf
+#       - /etc/nginx/ssl:/etc/nginx/ssl
+#     restart: always
+#     networks:
+#       - default
+#     environment:
+#       - TZ=America/New_York
+
+# networks:
+#   kuma_net:
+#     driver: bridge
+#   default:
+#     driver: bridge

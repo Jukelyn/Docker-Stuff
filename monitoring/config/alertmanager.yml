@@ -1,3 +1,4 @@
+# Not using for now
 global:
   smtp_smarthost: 'smtp:25'
   smtp_from: 'email@example.com'

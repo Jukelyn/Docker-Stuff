@@ -1,0 +1,43 @@
+services:
+  calpal_nginx:
+    container_name: calpal_nginx
+    image: nginx
+    volumes:
+      - ~/sites/CalPal/public:/usr/share/nginx/html:ro
+      - ~/sites/CalPal/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ~/docker/main/data/ssl:/etc/nginx/ssl:ro
+    restart: always
+    networks:
+      - main_sites
+    environment:
+      - TZ=America/New_York
+
+  jukelyn_nginx:
+    container_name: jukelyn_nginx
+    image: nginx
+    volumes:
+      - ~/sites/mysite/public:/usr/share/nginx/html
+      - ./data/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./data/ssl:/etc/nginx/ssl
+    restart: always
+    networks:
+      - main_sites
+    environment:
+      - TZ=America/New_York
+
+  landing_nginx:
+    container_name: landing_nginx
+    image: nginx
+    volumes:
+      - ~/sites/landing/public:/usr/share/nginx/html
+      - ./data/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./data/ssl:/etc/nginx/ssl
+    restart: always
+    networks:
+      - main_sites
+    environment:
+      - TZ=America/New_York
+
+networks:
+  main_sites:
+    external: true
