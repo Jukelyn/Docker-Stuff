@@ -8,14 +8,6 @@ services:
       - ${QBT_WEBUI_PORT}:8080/tcp  # qbt webui
       - ${QBT_TRAFFIC_PORT}:8080/udp  # QBT traffic
       - ${QBT_TRAFFIC_PORT}:6881/tcp  # QBT traffic
-      - ${PROWLARR_WEBUI}:9696  # prowlarr web ui
-      - ${FLARESOLVERR}:8191  # Flaresolverr
-      - ${SONARR_WEBUI}:8989  # sonarr web ui 
-      - ${RADARR_WEBUI}:7878  # radarr web ui 
-      - ${BAZARR_WEBUI}:6767  # bazarr web ui
-      # - 8686:8686  # lidarr web ui
-      # - 8787:8787  # readarr web ui
-      # - 6789:6789  # nzbget webui
     environment:
       - VPN_SERVICE_PROVIDER=surfshark
       - VPN_TYPE=wireguard
